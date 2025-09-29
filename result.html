@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>Результаты</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: #f5f5f5;
+      font-family: "Segoe UI", sans-serif;
+      color: #2c2c2c;
+    }
+    .card {
+      border: none;
+      border-radius: 16px;
+      background: #ffffff;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    h1, h5 {
+      color: #3e3e3e;
+    }
+    .correct { color: #5a8a57; font-weight: 600; }
+    .incorrect { color: #d9534f; font-weight: 600; }
+    .muted { color: #888; font-size: 0.9rem; }
+    .badge {
+      border-radius: 12px;
+      padding: 6px 10px;
+      font-size: 0.85rem;
+    }
+    .bg-success { background-color: #a6c48a !important; }
+    .bg-danger { background-color: #e28f83 !important; }
+    .bg-secondary { background-color: #d4b483 !important; }
+    .progress {
+      background-color: #e6dfd8;
+      border-radius: 12px;
+      height: 25px;
+    }
+    .progress-bar {
+      border-radius: 12px;
+      background-color: #a67c52;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    .btn {
+      border-radius: 12px;
+      padding: 8px 18px;
+      font-weight: 500;
+    }
+    .btn-primary {
+      background-color: #a67c52;
+      border: none;
+    }
+    .btn-primary:hover {
+      background-color: #8c6544;
+    }
+    .btn-secondary {
+      background-color: #c4c7a3;
+      border: none;
+    }
+    .btn-secondary:hover {
+      background-color: #a6a98a;
+    }
+  </style>
+</head>
+<body>
+<div class="container py-5">
+  <div class="card p-4 text-center mb-4">
+    <h1>🎉 Результаты теста</h1>
+    <p>Баллов (частичная система): <strong>{{ score }}</strong> из <strong>{{ total }}</strong></p>
+    <h5>Полностью правильных вопросов: 
+      <span class="badge bg-success">{{ full_correct_count }}</span> 
+      из <span class="badge bg-secondary">{{ total }}</span>
+    </h5>
+    <p class="mt-2">
+      ✔️ <span class="correct">{{ total_true }}</span> правильных ответов |
+      ❌ <span class="incorrect">{{ total_false }}</span> ошибок |
+      ⏭ <span>{{ total_missed }}</span> пропущено
+    </p>
+    <div class="progress mt-3">
+      <div class="progress-bar" role="progressbar" style="width: {{ percent }}%;">
+        {{ percent }}% правильных ответов
+      </div>
+    </div>
+  </div>
+
+  {% for r in results %}
+    <div class="card mb-3">
+      <div class="card-body">
+        <h5>Вопрос {{ loop.index }}: {{ r.question }}</h5>
+
+        <p><strong>Ваш ответ:</strong>
+          {% if r.type == "choice" %}
+            {% if r.your_answer and r.your_answer != "—" %}
+              {% for a in r.your_answer %}
+                {% if a in r.correct_answer %}
+                  <span class="correct">{{ a }}</span>
+                {% else %}
+                  <span class="incorrect">{{ a }}</span>
+                {% endif %}
+                {% if not loop.last %}, {% endif %}
+              {% endfor %}
+            {% else %}
+              — не отмечено
+            {% endif %}
+          {% else %}
+            {{ r.your_answer }}
+          {% endif %}
+        </p>
+
+        <p><strong>Правильный(е) вариант(ы):</strong>
+          {% for a in r.correct_answer %}
+            <span class="correct">{{ a }}</span>{% if not loop.last %}, {% endif %}
+          {% endfor %}
+        </p>
+
+        <p>✔️ Отмечено правильно: <span class="correct">{{ r.true_pos }}</span> |
+           ❌ Ошибочно: <span class="incorrect">{{ r.false_pos }}</span> |
+           ⏭ Пропущено: <span>{{ r.missed }}</span>
+        </p>
+
+        {% if r.is_fully_correct %}
+          <span class="badge bg-success">✅ Полностью правильно</span>
+        {% else %}
+          <span class="badge bg-danger">❌ Не полностью верно</span>
+        {% endif %}
+      </div>
+    </div>
+  {% endfor %}
+
+  <div class="text-center mt-4">
+    {% if session.role == 'teacher' %}
+      <a href="{{ url_for('stats') }}" class="btn btn-primary">📊 Статистика</a>
+      <a href="{{ url_for('admin') }}" class="btn btn-secondary">📝 Редактировать тест</a>
+    {% endif %}
+    <a href="{{ url_for('test_page') }}" class="btn btn-primary ms-2">🔄 Пройти ещё раз</a>
+  </div>
+</div>
+</body>
+</html>

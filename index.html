@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Генератор теста</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: #f5f5f5;
+      font-family: "Segoe UI", sans-serif;
+      color: #2c2c2c;
+    }
+    .card {
+      border: none;
+      border-radius: 16px;
+      background: #ffffff;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    h1 {
+      color: #3e3e3e;
+    }
+    label {
+      font-weight: 500;
+      color: #444;
+    }
+    .form-control, .form-select {
+      border-radius: 12px;
+      border: 1px solid #ddd;
+      padding: 10px 12px;
+      transition: all 0.2s;
+    }
+    .form-control:focus, .form-select:focus {
+      border-color: #a67c52;
+      box-shadow: 0 0 0 0.2rem rgba(166, 124, 82, 0.25);
+    }
+    .btn {
+      border-radius: 12px;
+      padding: 10px;
+      font-weight: 500;
+    }
+    .btn-primary {
+      background-color: #a67c52;
+      border: none;
+    }
+    .btn-primary:hover {
+      background-color: #8c6544;
+    }
+    .nav-teacher {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+    .nav-teacher .btn {
+      margin: 0 5px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container py-5">
+  <!-- Навигация для учителя -->
+  {% if session.role == 'teacher' %}
+  <div class="nav-teacher text-center">
+    <h4 class="text-white mb-3">Панель преподавателя</h4>
+    <div>
+      <a href="{{ url_for('index') }}" class="btn btn-light">📝 Генерация теста</a>
+      <a href="{{ url_for('admin') }}" class="btn btn-light">✏️ Редактирование теста</a>
+      <a href="{{ url_for('stats') }}" class="btn btn-light">📊 Статистика</a>
+      <a href="{{ url_for('logout') }}" class="btn btn-outline-light">🚪 Выйти</a>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="card shadow-lg p-4 mx-auto" style="max-width: 750px;">
+    <h1 class="text-center mb-4">📝 Создать тест</h1>
+
+    <form method="POST" enctype="multipart/form-data">
+      <!-- Ввод текста -->
+      <div class="mb-3">
+        <label class="form-label">Конспект (или загрузите файл)</label>
+        <textarea name="text" class="form-control" rows="6">{{ request.form.text or "" }}</textarea>
+      </div>
+
+      <!-- Загрузка файла -->
+      <div class="mb-3">
+        <label class="form-label">Загрузить файл (.txt, .pdf, .docx)</label>
+        <input type="file" name="file" class="form-control">
+      </div>
+
+      <!-- Количество вопросов и вариантов -->
+      <div class="row mb-3">
+        <div class="col-md-4 mb-3">
+          <label class="form-label">Вопросов</label>
+          <input type="number" name="num_questions" class="form-control" min="1" value="{{ request.form.num_questions or 5 }}" required>
+        </div>
+        <div class="col-md-4 mb-3">
+          <label class="form-label">Вариантов</label>
+          <input type="number" name="num_options" class="form-control" min="2" value="{{ request.form.num_options or 4 }}" required>
+        </div>
+        <div class="col-md-4 mb-3">
+          <label class="form-label">Сложность</label>
+          <select name="difficulty" class="form-select">
+            <option value="easy" {% if request.form.difficulty=='easy' %}selected{% endif %}>Легкий</option>
+            <option value="medium" {% if request.form.difficulty=='medium' %}selected{% endif %}>Средний</option>
+            <option value="hard" {% if request.form.difficulty=='hard' %}selected{% endif %}>Сложный</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Правильные / неправильные варианты -->
+      <div class="row mb-3">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Правильных ответов</label>
+          <input type="number" name="num_correct" class="form-control" min="1" value="{{ request.form.num_correct or 1 }}">
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Неправильных ответов</label>
+          <input type="number" name="num_incorrect" class="form-control" min="1" value="{{ request.form.num_incorrect or 3 }}">
+        </div>
+      </div>
+
+      <!-- Тип теста -->
+      <div class="mb-3">
+        <label class="form-label">Тип теста</label>
+        <select name="test_type" class="form-select">
+          <option value="choice" {% if request.form.test_type=='choice' %}selected{% endif %}>С выбором ответа</option>
+          <option value="text" {% if request.form.test_type=='text' %}selected{% endif %}>Развернутый ответ</option>
+          <option value="mixed" {% if request.form.test_type=='mixed' %}selected{% endif %}>Смешанный</option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100 mt-3">Сгенерировать 🚀</button>
+    </form>
+  </div>
+</div>
+
+</body>
+</html>
